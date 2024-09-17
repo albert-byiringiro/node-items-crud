@@ -60,7 +60,26 @@ router.get('/:id', async (req, res) => {
 
         res.status(200).json(item)
     } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' })
+    }
+})
 
+router.post('/', async (req, res) => {
+    try {
+        const db = getDB()
+        const { name, description, price } = req.body
+
+        if (!name || !description || !price) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        const newItem = { name, description, price: parseFloat(price) }
+
+        const result = await db.collection('items').insertOne(newItem)
+
+        res.status(201).json({ _id: result.insertedId, ...newItem })
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' })
     }
 })
 

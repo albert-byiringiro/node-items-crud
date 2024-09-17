@@ -12,6 +12,7 @@ const router = Router();
 
 let db
 
+// connect to the database
 const connectToDatabase = async () => {
     try {
         const client = new MongoClient(process.env.MONGO_DB_URI)
@@ -23,6 +24,12 @@ const connectToDatabase = async () => {
     }
 }
 
+function getDB() {
+    if (!db) {
+        throw new Error('Database not initialized. Call connectToDatabase first.');
+    }
+    return db;
+}
 
 
 // global middlewares
@@ -30,8 +37,15 @@ app.use(cors())
 app.use('/items', router)
 
 
-router.get('/', (req, res) => {
-    res.send('Getting all items')
+// routes
+router.get('/', async (req, res) => {
+    try {
+        const db = getDB()
+        const items = await db.collection("items").find().toArray()
+        res.status(200).json(items)
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' })
+    }
 })
 
 

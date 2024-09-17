@@ -34,13 +34,14 @@ function getDB() {
 
 // global middlewares
 app.use(cors())
+app.use(express.json())
 app.use('/items', router)
 
 
 // routes
 router.get('/', async (req, res) => {
     try {
-        const db = db
+        const db = getDB()
         const items = await db.collection("items").find().toArray()
         res.status(200).json(items)
     } catch (error) {
@@ -113,6 +114,24 @@ router.put('/:id', async (req, res) => {
 
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' })
+    }
+})
+
+
+router.delete('/:id', async (req, res) => {
+    try {
+        const db = getDB()
+        const id = new ObjectId(req.params.id)
+
+        const result = await db.collection('items').deleteOne({ _id: id })
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ error: 'Item not found' })
+        }
+
+        res.status(200).json({ message: 'Item deleted successfully' })
+    } catch (error) {
+
     }
 })
 

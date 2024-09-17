@@ -1,7 +1,7 @@
 import dotenv from "dotenv"
 import express from "express"
 import cors from "cors"
-import { MongoClient } from "mongodb"
+import { MongoClient, ObjectId } from "mongodb"
 import { Router } from "express"
 
 dotenv.config()
@@ -45,6 +45,22 @@ router.get('/', async (req, res) => {
         res.status(200).json(items)
     } catch (error) {
         res.status(500).json({ error: 'Internal Server Error' })
+    }
+})
+
+router.get('/:id', async (req, res) => {
+    try {
+        const db = getDB()
+        const id = new ObjectId(req.params.id)
+        const item = await db.collection('items').findOne({ _id: id })
+
+        if (!item) {
+            res.status(404).json({ error: 'Item not found' })
+        }
+
+        res.status(200).json(item)
+    } catch (error) {
+
     }
 })
 
